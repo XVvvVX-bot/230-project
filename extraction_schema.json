@@ -1,0 +1,85 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packet_id",
+    "actionable",
+    "decisive_email_id",
+    "focal_sku",
+    "affected_location",
+    "disruption_type",
+    "original_eta",
+    "revised_eta",
+    "delay_days",
+    "quantity_affected",
+    "confidence"
+  ],
+  "properties": {
+    "packet_id": {
+      "type": "string"
+    },
+    "actionable": {
+      "type": "boolean"
+    },
+    "decisive_email_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "focal_sku": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "affected_location": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "disruption_type": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "lead_time_delay",
+        "partial_shipment",
+        "shipment_cancellation",
+        "corrected_update",
+        null
+      ]
+    },
+    "original_eta": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "revised_eta": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "delay_days": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "quantity_affected": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    }
+  }
+}
