@@ -5,13 +5,12 @@ import math
 import os
 import random
 import statistics
-import re
 from collections import Counter, defaultdict
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from gemini_inference import DEFAULT_GEMINI_MODEL, run_gemini_predictions
 
@@ -21,6 +20,18 @@ SERVICE_Z = 1.645
 REVIEW_PERIOD_DAYS = 1
 SIM_RUNS = 100
 DISTRACTOR_TYPES = ["irrelevant_chatter", "wrong_sku", "resolved_issue", "admin_note"]
+REQUIRED_PREDICTION_KEYS = {
+    "packet_id",
+    "actionable",
+    "decisive_email_id",
+    "focal_sku",
+    "affected_location",
+    "disruption_type",
+    "original_eta",
+    "revised_eta",
+    "delay_days",
+    "quantity_affected",
+}
 
 
 @dataclass
@@ -126,6 +137,13 @@ def load_existing_packets(data_dir: Path) -> Dict[str, List[Dict]]:
     pilot_path = data_dir / "pilot_packets.jsonl"
     dataset["pilot"] = read_jsonl(pilot_path) if pilot_path.exists() else []
     return dataset
+
+
+def maybe_limit_packets(packets: List[Dict]) -> List[Dict]:
+    max_packets = int(os.environ.get("MAX_PACKETS", "0"))
+    if max_packets > 0:
+        return packets[:max_packets]
+    return packets
 
 
 def load_experiment_config() -> ExperimentConfig:
@@ -256,6 +274,88 @@ def demo_llm_prediction(packet: Dict, rng: random.Random) -> Dict:
         prediction["confidence"] = 0.61
 
     return prediction
+
+
+def coerce_bool(value) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "1", "yes", "y"}
+    if isinstance(value, (int, float)):
+        return bool(value)
+    return False
+
+
+def coerce_int_or_none(value) -> Optional[int]:
+    if value is None or value == "":
+        return None
+    try:
+        return int(round(float(value)))
+    except (TypeError, ValueError):
+        return None
+
+
+def coerce_str_or_none(value) -> Optional[str]:
+    if value is None:
+        return None
+    value = str(value).strip()
+    return value or None
+
+
+def validate_iso_date_or_none(value) -> Optional[str]:
+    value = coerce_str_or_none(value)
+    if value is None:
+        return None
+    try:
+        date.fromisoformat(value)
+        return value
+    except ValueError:
+        return None
+
+
+def sanitize_prediction(row: Dict) -> Dict:
+    sanitized = {k: row.get(k) for k in REQUIRED_PREDICTION_KEYS}
+    sanitized["packet_id"] = coerce_str_or_none(sanitized.get("packet_id"))
+    sanitized["actionable"] = coerce_bool(sanitized.get("actionable"))
+    sanitized["decisive_email_id"] = coerce_str_or_none(sanitized.get("decisive_email_id"))
+    sanitized["focal_sku"] = coerce_str_or_none(sanitized.get("focal_sku"))
+    sanitized["affected_location"] = coerce_str_or_none(sanitized.get("affected_location"))
+    sanitized["disruption_type"] = coerce_str_or_none(sanitized.get("disruption_type"))
+    sanitized["original_eta"] = validate_iso_date_or_none(sanitized.get("original_eta"))
+    sanitized["revised_eta"] = validate_iso_date_or_none(sanitized.get("revised_eta"))
+    sanitized["delay_days"] = coerce_int_or_none(sanitized.get("delay_days"))
+    sanitized["quantity_affected"] = coerce_int_or_none(sanitized.get("quantity_affected"))
+    if not sanitized["actionable"]:
+        sanitized.update(empty_signal())
+        sanitized["packet_id"] = coerce_str_or_none(row.get("packet_id"))
+    return sanitized
+
+
+def validate_prediction_rows(requests: List[Dict], predictions: List[Dict]) -> Tuple[List[Dict], List[str]]:
+    request_ids = [req["packet_id"] for req in requests]
+    request_set = set(request_ids)
+    seen = set()
+    errors: List[str] = []
+    cleaned: List[Dict] = []
+    for idx, row in enumerate(predictions):
+        cleaned_row = sanitize_prediction(row)
+        packet_id = cleaned_row.get("packet_id")
+        if packet_id is None:
+            errors.append(f"row {idx}: missing packet_id")
+            continue
+        if packet_id not in request_set:
+            errors.append(f"row {idx}: unknown packet_id {packet_id}")
+            continue
+        if packet_id in seen:
+            errors.append(f"row {idx}: duplicate packet_id {packet_id}")
+            continue
+        seen.add(packet_id)
+        cleaned.append(cleaned_row)
+
+    missing = [pid for pid in request_ids if pid not in seen]
+    if missing:
+        errors.append(f"missing predictions for packets: {missing[:10]}")
+    return cleaned, errors
 
 
 def base_stock_level(demand_mean: float, demand_std: float, lead_time_days: int) -> int:
@@ -488,30 +588,6 @@ def choose_action_timeline(
     return best_choice
 
 
-def choose_action(packet: Dict, record: Dict) -> Dict:
-    target = base_stock_level(record["demand_mean"], record["demand_std"], record["effective_lead_time"])
-    inventory_position = record["current_inventory"] + record["effective_on_order"]
-    reorder_qty = max(0, target - inventory_position)
-    p_over_h = record["shortage_cost"] / max(record["holding_cost"], 1e-6)
-    delay_days = max(0, record["effective_lead_time"] - record["lead_time_days"])
-
-    if reorder_qty == 0:
-        action = "no_action"
-    elif packet["surplus_pool_qty"] >= max(40, int(0.7 * reorder_qty)):
-        action = "reallocate"
-    elif delay_days <= 3 and p_over_h >= 3.0:
-        action = "expedite"
-    else:
-        action = "reorder"
-
-    return {
-        "action": action,
-        "reorder_qty": reorder_qty,
-        "target_base_stock": target,
-        "inventory_position": inventory_position,
-    }
-
-
 def omnipotent_gold_outcome() -> PolicyOutcome:
     return PolicyOutcome(
         action="perfect_schedule",
@@ -673,7 +749,6 @@ def evaluate_extraction(scored_packets: List[Dict], predictions: Dict[str, Dict]
     delay_errors = []
     quantity_errors = []
     failure_modes = Counter()
-    failure_reorder_gap = defaultdict(list)
 
     for packet in scored_packets:
         gold = packet["gold"]
@@ -717,14 +792,9 @@ def evaluate_extraction(scored_packets: List[Dict], predictions: Dict[str, Dict]
         "failure_modes": dict(failure_modes.most_common()),
     }
 
-def evaluate_decisions(
-    scored_packets: List[Dict],
-    predictions: Dict[str, Dict],
-    rule_prediction_map: Dict[str, Dict],
-    simulated_prediction_map: Optional[Dict[str, Dict]],
-    config: ExperimentConfig,
-) -> Dict:
-    arm_names = ["gold", "llm_instant", "llm_simulated", "rule_based_instant", "system_based_operation", "human_planner_only"]
+
+def evaluate_decisions(scored_packets: List[Dict], predictions: Dict[str, Dict], config: ExperimentConfig) -> Dict:
+    arm_names = ["gold", "llm_instant", "system_based_operation", "human_planner_only"]
     arm_rollups = {arm: [] for arm in arm_names}
     per_packet = []
     noise_rollups = defaultdict(
@@ -750,15 +820,6 @@ def evaluate_decisions(
             demand_path = demand_path_for_trial(rng, operational_record, config)
             scaled_true_signal = scale_signal_for_operational_record(focal_record, operational_record, true_signal)
             scaled_llm_signal = scale_signal_for_operational_record(focal_record, operational_record, llm_signal)
-            scaled_simulated_signal = (
-                scale_signal_for_operational_record(
-                    focal_record,
-                    operational_record,
-                    simulated_prediction_map[packet["packet_id"]],
-                )
-                if simulated_prediction_map is not None
-                else scaled_llm_signal
-            )
             true_events = build_inbound_schedule(operational_record, scaled_true_signal, config)
 
             trial_runs["llm_instant"].append(
@@ -769,38 +830,6 @@ def evaluate_decisions(
                     initial_inventory,
                     true_events,
                     scaled_llm_signal,
-                    response_hours=0.0,
-                    miss_prob=0.0,
-                    rng=rng,
-                    config=config,
-                )
-            )
-            trial_runs["llm_simulated"].append(
-                simulate_single_arm_run(
-                    packet,
-                    operational_record,
-                    demand_path,
-                    initial_inventory,
-                    true_events,
-                    scaled_simulated_signal,
-                    response_hours=0.0,
-                    miss_prob=0.0,
-                    rng=rng,
-                    config=config,
-                )
-            )
-            trial_runs["rule_based_instant"].append(
-                simulate_single_arm_run(
-                    packet,
-                    operational_record,
-                    demand_path,
-                    initial_inventory,
-                    true_events,
-                    scale_signal_for_operational_record(
-                        focal_record,
-                        operational_record,
-                        rule_prediction_map[packet["packet_id"]],
-                    ),
                     response_hours=0.0,
                     miss_prob=0.0,
                     rng=rng,
@@ -839,8 +868,6 @@ def evaluate_decisions(
         outcomes = {
             "gold": omnipotent_gold_outcome(),
             "llm_instant": summarize_arm_runs(trial_runs["llm_instant"]),
-            "llm_simulated": summarize_arm_runs(trial_runs["llm_simulated"]),
-            "rule_based_instant": summarize_arm_runs(trial_runs["rule_based_instant"]),
             "system_based_operation": summarize_arm_runs(trial_runs["system_based_operation"]),
             "human_planner_only": summarize_arm_runs(trial_runs["human_planner_only"]),
         }
@@ -874,8 +901,6 @@ def evaluate_decisions(
                 "gold_cost": round(outcomes["gold"].mean_cost, 3),
                 "llm_action": outcomes["llm_instant"].action,
                 "llm_cost_increment": round(outcomes["llm_instant"].mean_cost, 3),
-                "llm_simulated_action": outcomes["llm_simulated"].action,
-                "llm_simulated_cost_increment": round(outcomes["llm_simulated"].mean_cost, 3),
                 "system_action": outcomes["system_based_operation"].action,
                 "system_cost_increment": round(outcomes["system_based_operation"].mean_cost, 3),
                 "human_action": outcomes["human_planner_only"].action,
@@ -1064,8 +1089,6 @@ def build_summary_markdown(
     ]
     for arm_key, label in [
         ("gold", "Gold omnipotent"),
-        ("rule_based_instant", "Rule-based instant"),
-        ("llm_simulated", "LLM simulated"),
         ("llm_instant", "LLM instant"),
         ("system_based_operation", "System-based operation"),
         ("human_planner_only", "Human planner only"),
@@ -1107,57 +1130,43 @@ def build_summary_markdown(
     )
     return "\n".join(lines)
 
-def rule_based_prediction(packet: Dict) -> Dict:
-    emails = packet["emails"]
-    keywords = ["delay", "eta", "partial", "cancel", "correction", "updated"]
-    scored = []
 
-    for email in emails:
-        text = (email["subject"] + " " + email["body"]).lower()
-        score = sum(k in text for k in keywords)
-        scored.append((score, email))
+def resolve_predictions(
+    requests: List[Dict],
+    scored_packets: List[Dict],
+    outputs_dir: Path,
+) -> Tuple[List[Dict], str, List[str]]:
+    demo_predictions_path = outputs_dir / "demo_llm_predictions.jsonl"
+    actual_predictions_path = outputs_dir / "actual_llm_predictions.jsonl"
+    validation_log_path = outputs_dir / "prediction_validation_errors.log"
+    provider = os.environ.get("LLM_PROVIDER", "").strip().lower()
+    warnings: List[str] = []
 
-    scored.sort(reverse=True, key=lambda x: x[0])
-    best_email = scored[0][1]
-
-    text = best_email["subject"] + " " + best_email["body"]
-
-    sku_match = re.search(r"SKU-\d{3}-[A-Z]", text)
-    sku = sku_match.group(0) if sku_match else None
-
-    loc_match = re.search(r"DC-(WEST|EAST|CENTRAL|SOUTH|NORTH)", text)
-    location = f"DC-{loc_match.group(1)}" if loc_match else None
-
-    t = text.lower()
-    if "cancel" in t:
-        disruption = "shipment_cancellation"
-    elif "partial" in t:
-        disruption = "partial_shipment"
-    elif "correction" in t:
-        disruption = "corrected_update"
-    elif "delay" in t or "eta" in t:
-        disruption = "lead_time_delay"
+    if provider == "gemini":
+        raw_predictions = run_gemini_predictions(requests, actual_predictions_path)
+        prediction_source = f"gemini:{os.environ.get('GEMINI_MODEL', DEFAULT_GEMINI_MODEL)}"
+    elif actual_predictions_path.exists():
+        raw_predictions = read_jsonl(actual_predictions_path)
+        prediction_source = actual_predictions_path.name
     else:
-        disruption = None
+        rng = random.Random(SEED + 99)
+        demo_predictions = [demo_llm_prediction(packet, rng) for packet in scored_packets]
+        write_jsonl(demo_predictions_path, demo_predictions)
+        raw_predictions = demo_predictions
+        prediction_source = demo_predictions_path.name
+        warnings.append("Using demo_llm_predictions.jsonl because no real provider or actual predictions were supplied.")
 
-    qty_match = re.search(r"(\d+)\s+units", t)
-    quantity = int(qty_match.group(1)) if qty_match else None
+    cleaned_predictions, errors = validate_prediction_rows(requests, raw_predictions)
+    if errors:
+        validation_log_path.write_text("\n".join(errors), encoding="utf-8")
+        raise ValueError(
+            f"Prediction validation failed with {len(errors)} issue(s). See {validation_log_path} for details."
+        )
+    if validation_log_path.exists():
+        validation_log_path.unlink()
 
-    delay = 3 if "delay" in t else None
+    return cleaned_predictions, prediction_source, warnings
 
-    return {
-        "packet_id": packet["packet_id"],
-        "actionable": True if disruption else False,
-        "decisive_email_id": best_email["email_id"],
-        "focal_sku": sku,
-        "affected_location": location,
-        "disruption_type": disruption,
-        "original_eta": None,
-        "revised_eta": None,
-        "delay_days": delay,
-        "quantity_affected": quantity,
-        "confidence": 0.5,
-    }
 
 def main() -> None:
     root = Path(__file__).resolve().parent
@@ -1168,35 +1177,18 @@ def main() -> None:
     schema = json.loads((root / "extraction_schema.json").read_text(encoding="utf-8"))
 
     dataset = load_existing_packets(dirs["data"])
+    dataset["scored"] = maybe_limit_packets(dataset["scored"])
 
     requests = packet_prompt_requests(dataset["scored"], prompt_text, schema)
     write_jsonl(dirs["outputs"] / "llm_requests.jsonl", requests)
 
-    demo_predictions_path = dirs["outputs"] / "demo_llm_predictions.jsonl"
-    actual_predictions_path = dirs["outputs"] / "actual_llm_predictions.jsonl"
-    provider = os.environ.get("LLM_PROVIDER", "").strip().lower()
+    predictions, prediction_source, warnings = resolve_predictions(
+        requests=requests,
+        scored_packets=dataset["scored"],
+        outputs_dir=dirs["outputs"],
+    )
 
-    simulated_predictions_path = dirs["outputs"] / "actual_llm_predictions_simulated.jsonl"
-    simulated_prediction_map = None
-    if simulated_predictions_path.exists():
-        simulated_predictions = read_jsonl(simulated_predictions_path)
-        simulated_prediction_map = {row["packet_id"]: row for row in simulated_predictions}
-        
-    if provider == "gemini":
-        predictions = run_gemini_predictions(requests, actual_predictions_path)
-        prediction_source = f"gemini:{os.environ.get('GEMINI_MODEL', DEFAULT_GEMINI_MODEL)}"
-    elif actual_predictions_path.exists():
-        predictions = read_jsonl(actual_predictions_path)
-        prediction_source = actual_predictions_path.name
-    else:
-        rng = random.Random(SEED + 99)
-        demo_predictions = [demo_llm_prediction(packet, rng) for packet in dataset["scored"]]
-        write_jsonl(demo_predictions_path, demo_predictions)
-        predictions = demo_predictions
-        prediction_source = demo_predictions_path.name
     prediction_map = {row["packet_id"]: row for row in predictions}
-    rule_predictions = [rule_based_prediction(packet) for packet in dataset["scored"]]
-    rule_prediction_map = {row["packet_id"]: row for row in rule_predictions}
     missing_packets = [packet["packet_id"] for packet in dataset["scored"] if packet["packet_id"] not in prediction_map]
     if missing_packets:
         raise ValueError(
@@ -1204,13 +1196,7 @@ def main() -> None:
         )
 
     extraction_metrics = evaluate_extraction(dataset["scored"], prediction_map)
-    decision_metrics = evaluate_decisions(
-        dataset["scored"],
-        prediction_map,
-        rule_prediction_map,
-        simulated_prediction_map,
-        config,
-    )
+    decision_metrics = evaluate_decisions(dataset["scored"], prediction_map, config)
     trial_design = build_trial_design_summary(dataset["scored"])
     error_analysis = create_error_analysis(dataset["scored"], prediction_map)
 
@@ -1218,10 +1204,12 @@ def main() -> None:
         "seed": SEED,
         "simulation_runs_per_packet": SIM_RUNS,
         "prediction_source": prediction_source,
+        "warnings": warnings,
         "experiment_parameters": {
             "system_response_hours": config.system_response_hours,
             "human_response_hours": config.human_response_hours,
             "human_miss_prob": config.human_miss_prob,
+            "max_packets": int(os.environ.get("MAX_PACKETS", "0")),
         },
         "trial_design": trial_design,
         "extraction_metrics": extraction_metrics,
@@ -1238,6 +1226,10 @@ def main() -> None:
 
     print("Experiment artifacts written to:")
     print(f"- {dirs['outputs']}")
+    if warnings:
+        print("Warnings:")
+        for warning in warnings:
+            print(f"- {warning}")
 
 
 if __name__ == "__main__":

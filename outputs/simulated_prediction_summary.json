@@ -1,0 +1,18 @@
+{
+  "num_packets": 60,
+  "packet_level_exact_match": 0.65,
+  "exact_match_by_noise_tier": {
+    "low": 0.75,
+    "medium": 0.65,
+    "high": 0.55
+  },
+  "mean_confidence": 0.746,
+  "error_tag_counts": {
+    "quantity_misread": 8,
+    "wrong_sku_or_location": 6,
+    "wrong_decisive_email": 6,
+    "delay_misread": 3,
+    "stale_update_followed": 3,
+    "delay_treated_as_partial": 1
+  }
+}
