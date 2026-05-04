@@ -1,0 +1,1500 @@
+{
+  "seed": 230,
+  "scored_packet_count": 60,
+  "simulation_runs_per_packet_arm": 100,
+  "horizon_days": 10,
+  "arms": [
+    "oracle",
+    "llm_agent",
+    "rule_system",
+    "human_planner",
+    "hybrid_llm_human"
+  ],
+  "costs": {
+    "loaded_planner_hourly_cost": 50.0,
+    "human_review_minutes": 30.0,
+    "hybrid_approval_minutes": 10.0,
+    "llm_processing_cost": 0.25,
+    "rule_processing_cost": 0.1,
+    "human_processing_cost": 25.0,
+    "hybrid_processing_cost": 8.583333333333334
+  },
+  "latency_design": {
+    "llm_delay_days": 0.05,
+    "rule_delay_days": 0.05,
+    "human_delay_distribution": [
+      [
+        0.5,
+        0.2
+      ],
+      [
+        1.0,
+        0.35
+      ],
+      [
+        2.0,
+        0.3
+      ],
+      [
+        3.0,
+        0.15
+      ]
+    ],
+    "hybrid_approval_distribution": [
+      [
+        0.25,
+        0.5
+      ],
+      [
+        0.5,
+        0.35
+      ],
+      [
+        1.0,
+        0.15
+      ]
+    ],
+    "human_miss_by_noise": {
+      "low": 0.04,
+      "medium": 0.1,
+      "high": 0.18
+    }
+  },
+  "cutoff_design": {
+    "S001": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 4.726013750714903,
+      "action_cutoff_day": 6.101013750714903
+    },
+    "S002": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 1.061584364360497,
+      "action_cutoff_day": 2.436584364360497
+    },
+    "S003": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 1.6497687064151512,
+      "action_cutoff_day": 3.024768706415151
+    },
+    "S004": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.959751178858192,
+      "action_cutoff_day": 2.334751178858192
+    },
+    "S005": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.2697372482073748,
+      "action_cutoff_day": 3.6447372482073748
+    },
+    "S006": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.5313263267055937,
+      "action_cutoff_day": 1.9063263267055937
+    },
+    "S007": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "near_impossible",
+      "cutoff_slack_days": 0.10298117497555931,
+      "action_cutoff_day": 1.4779811749755594
+    },
+    "S008": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 3.693239913222854,
+      "action_cutoff_day": 5.068239913222854
+    },
+    "S009": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "near_impossible",
+      "cutoff_slack_days": 0.20063580445144835,
+      "action_cutoff_day": 1.5756358044514482
+    },
+    "S010": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.9312987510921884,
+      "action_cutoff_day": 4.306298751092188
+    },
+    "S011": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.1587196808564766,
+      "action_cutoff_day": 3.5337196808564766
+    },
+    "S012": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 3.7934375729562606,
+      "action_cutoff_day": 5.168437572956261
+    },
+    "S013": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 1.8391071707862412,
+      "action_cutoff_day": 3.2141071707862414
+    },
+    "S014": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 1.100673773494606,
+      "action_cutoff_day": 2.4756737734946057
+    },
+    "S015": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.3316819498145667,
+      "action_cutoff_day": 3.7066819498145667
+    },
+    "S016": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.2404670504609427,
+      "action_cutoff_day": 3.6154670504609427
+    },
+    "S017": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 4.83378603688452,
+      "action_cutoff_day": 6.20878603688452
+    },
+    "S018": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 4.704518689618232,
+      "action_cutoff_day": 6.079518689618232
+    },
+    "S019": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 4.7642596990231585,
+      "action_cutoff_day": 6.1392596990231585
+    },
+    "S020": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.7753898258374656,
+      "action_cutoff_day": 4.150389825837466
+    },
+    "S021": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.3017807960716636,
+      "action_cutoff_day": 3.6767807960716636
+    },
+    "S022": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 1.9237184304365136,
+      "action_cutoff_day": 3.2987184304365136
+    },
+    "S023": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "near_impossible",
+      "cutoff_slack_days": 0.42242922277951944,
+      "action_cutoff_day": 1.7974292227795194
+    },
+    "S024": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.256318142871093,
+      "action_cutoff_day": 3.631318142871093
+    },
+    "S025": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.6267514061702409,
+      "action_cutoff_day": 2.001751406170241
+    },
+    "S026": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.8573512130198746,
+      "action_cutoff_day": 4.232351213019875
+    },
+    "S027": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 3.8888192246413515,
+      "action_cutoff_day": 5.2638192246413515
+    },
+    "S028": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.0331255712053933,
+      "action_cutoff_day": 3.4081255712053933
+    },
+    "S029": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 1.055876392061747,
+      "action_cutoff_day": 2.430876392061747
+    },
+    "S030": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 3.0792592729525,
+      "action_cutoff_day": 4.4542592729525
+    },
+    "S031": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "near_impossible",
+      "cutoff_slack_days": 0.41725898240885845,
+      "action_cutoff_day": 1.7922589824088584
+    },
+    "S032": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.6556969843715312,
+      "action_cutoff_day": 2.0306969843715312
+    },
+    "S033": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 1.7216833075716924,
+      "action_cutoff_day": 3.096683307571692
+    },
+    "S034": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.294303311411385,
+      "action_cutoff_day": 3.669303311411385
+    },
+    "S035": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.6870850236680018,
+      "action_cutoff_day": 2.062085023668002
+    },
+    "S036": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 1.0938213111631319,
+      "action_cutoff_day": 2.468821311163132
+    },
+    "S037": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.9132235055767278,
+      "action_cutoff_day": 2.3298901722433945
+    },
+    "S038": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.7030194880849395,
+      "action_cutoff_day": 2.1196861547516064
+    },
+    "S039": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 4.504484503798364,
+      "action_cutoff_day": 5.921151170465031
+    },
+    "S040": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.9006076116627872,
+      "action_cutoff_day": 2.317274278329454
+    },
+    "S041": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 1.744293487408883,
+      "action_cutoff_day": 3.16096015407555
+    },
+    "S042": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.0006123005915804,
+      "action_cutoff_day": 3.4172789672582473
+    },
+    "S043": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 3.9572582668274086,
+      "action_cutoff_day": 5.3739249334940755
+    },
+    "S044": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 1.6100594828663097,
+      "action_cutoff_day": 3.0267261495329763
+    },
+    "S045": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 1.5313106335558313,
+      "action_cutoff_day": 2.9479773002224983
+    },
+    "S046": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "near_impossible",
+      "cutoff_slack_days": 0.1362705701095862,
+      "action_cutoff_day": 1.5529372367762528
+    },
+    "S047": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 4.345789798035295,
+      "action_cutoff_day": 5.762456464701962
+    },
+    "S048": {
+      "signal_arrival_day": 1.4166666666666667,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 1.1003423210572425,
+      "action_cutoff_day": 2.5170089877239095
+    },
+    "S049": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.9715555261315919,
+      "action_cutoff_day": 2.346555526131592
+    },
+    "S050": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.6226002155148885,
+      "action_cutoff_day": 1.9976002155148884
+    },
+    "S051": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "near_impossible",
+      "cutoff_slack_days": 0.14186606626517217,
+      "action_cutoff_day": 1.5168660662651723
+    },
+    "S052": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 0.5157558876687419,
+      "action_cutoff_day": 1.890755887668742
+    },
+    "S053": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 3.758014729912435,
+      "action_cutoff_day": 5.133014729912436
+    },
+    "S054": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 3.5284495855409297,
+      "action_cutoff_day": 4.90344958554093
+    },
+    "S055": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 4.729633780403971,
+      "action_cutoff_day": 6.104633780403971
+    },
+    "S056": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.743024413908725,
+      "action_cutoff_day": 4.118024413908725
+    },
+    "S057": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "moderate",
+      "cutoff_slack_days": 2.05996852295597,
+      "action_cutoff_day": 3.43496852295597
+    },
+    "S058": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 1.3020382170021179,
+      "action_cutoff_day": 2.677038217002118
+    },
+    "S059": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "easy",
+      "cutoff_slack_days": 4.00964186202715,
+      "action_cutoff_day": 5.38464186202715
+    },
+    "S060": {
+      "signal_arrival_day": 1.375,
+      "cutoff_tier": "tight",
+      "cutoff_slack_days": 1.0181778728669184,
+      "action_cutoff_day": 2.3931778728669184
+    }
+  },
+  "extraction_accuracy": {
+    "llm_agent": {
+      "packet_count": 60,
+      "packet_exact_match": 0.6166666666666667,
+      "field_accuracy": {
+        "actionable": 0.9833333333333333,
+        "decisive_email_id": 0.9833333333333333,
+        "focal_sku": 0.9833333333333333,
+        "affected_location": 0.9833333333333333,
+        "disruption_type": 0.9833333333333333,
+        "original_eta": 0.8166666666666667,
+        "revised_eta": 0.85,
+        "delay_days": 0.7833333333333333,
+        "quantity_affected": 0.9
+      }
+    },
+    "rule_system": {
+      "packet_count": 60,
+      "packet_exact_match": 0.6,
+      "field_accuracy": {
+        "actionable": 0.8333333333333334,
+        "decisive_email_id": 0.8333333333333334,
+        "focal_sku": 0.8333333333333334,
+        "affected_location": 0.8333333333333334,
+        "disruption_type": 0.8333333333333334,
+        "original_eta": 0.6833333333333333,
+        "revised_eta": 0.75,
+        "delay_days": 0.65,
+        "quantity_affected": 0.8333333333333334
+      }
+    }
+  },
+  "arm_summary": [
+    {
+      "arm": "human_planner",
+      "runs": 6000,
+      "mean_total_cost": 2033.0024497927852,
+      "mean_cost_gap_vs_oracle": 2033.0024497927852,
+      "mean_stockout_cost": 1167.4192476646506,
+      "mean_holding_cost": 715.6221354614679,
+      "mean_action_cost": 124.96106666666667,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.7111560244284335,
+      "mean_service_loss_vs_baseline": 0.049730065217308855,
+      "before_cutoff_rate": 0.6133333333333333,
+      "miss_rate": 0.106,
+      "extraction_exact_rate": 0.894
+    },
+    {
+      "arm": "hybrid_llm_human",
+      "runs": 6000,
+      "mean_total_cost": 1868.516779087721,
+      "mean_cost_gap_vs_oracle": 1868.516779087721,
+      "mean_stockout_cost": 850.4267738665156,
+      "mean_holding_cost": 834.392571887872,
+      "mean_action_cost": 175.1141,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.7934755024842184,
+      "mean_service_loss_vs_baseline": 0.02369480588663398,
+      "before_cutoff_rate": 0.8733333333333333,
+      "miss_rate": 0.016666666666666666,
+      "extraction_exact_rate": 0.6166666666666667
+    },
+    {
+      "arm": "llm_agent",
+      "runs": 6000,
+      "mean_total_cost": 1913.0578533556074,
+      "mean_cost_gap_vs_oracle": 1913.0578533556074,
+      "mean_stockout_cost": 804.8272216874134,
+      "mean_holding_cost": 918.2989650015273,
+      "mean_action_cost": 189.68166666666667,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.8061221408104058,
+      "mean_service_loss_vs_baseline": 0.02468228710007572,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.6166666666666667
+    },
+    {
+      "arm": "oracle",
+      "runs": 6000,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "arm": "rule_system",
+      "runs": 6000,
+      "mean_total_cost": 1983.8281396140205,
+      "mean_cost_gap_vs_oracle": 1983.8281396140205,
+      "mean_stockout_cost": 996.5390890930585,
+      "mean_holding_cost": 836.6440505209622,
+      "mean_action_cost": 150.545,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.752403316755956,
+      "mean_service_loss_vs_baseline": 0.045291264043288114,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.6
+    }
+  ],
+  "by_pattern": [
+    {
+      "pattern": "ambiguous_buried_delay",
+      "arm": "human_planner",
+      "runs": 1200,
+      "mean_total_cost": 2136.639654741096,
+      "mean_cost_gap_vs_oracle": 2136.639654741096,
+      "mean_stockout_cost": 1093.7602470066588,
+      "mean_holding_cost": 869.1277827344373,
+      "mean_action_cost": 148.751625,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.7335495619865475,
+      "mean_service_loss_vs_baseline": 0.04197220132196021,
+      "before_cutoff_rate": 0.6141666666666666,
+      "miss_rate": 0.10333333333333333,
+      "extraction_exact_rate": 0.8966666666666666
+    },
+    {
+      "pattern": "ambiguous_buried_delay",
+      "arm": "hybrid_llm_human",
+      "runs": 1200,
+      "mean_total_cost": 2015.1535499934885,
+      "mean_cost_gap_vs_oracle": 2015.1535499934885,
+      "mean_stockout_cost": 786.4646837726718,
+      "mean_holding_cost": 1022.8899995541499,
+      "mean_action_cost": 197.21553333333333,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.8090687823540859,
+      "mean_service_loss_vs_baseline": 0.025853942633945325,
+      "before_cutoff_rate": 0.8291666666666667,
+      "miss_rate": 0.08333333333333333,
+      "extraction_exact_rate": 0.4166666666666667
+    },
+    {
+      "pattern": "ambiguous_buried_delay",
+      "arm": "llm_agent",
+      "runs": 1200,
+      "mean_total_cost": 1990.1912674496743,
+      "mean_cost_gap_vs_oracle": 1990.1912674496743,
+      "mean_stockout_cost": 713.4976131038372,
+      "mean_holding_cost": 1072.322821012504,
+      "mean_action_cost": 204.12083333333334,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.8368213737800075,
+      "mean_service_loss_vs_baseline": 0.02094438709027815,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.4166666666666667
+    },
+    {
+      "pattern": "ambiguous_buried_delay",
+      "arm": "oracle",
+      "runs": 1200,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "pattern": "ambiguous_buried_delay",
+      "arm": "rule_system",
+      "runs": 1200,
+      "mean_total_cost": 2111.9395310796613,
+      "mean_cost_gap_vs_oracle": 2111.9395310796613,
+      "mean_stockout_cost": 1079.6212724524898,
+      "mean_holding_cost": 894.4140919605051,
+      "mean_action_cost": 137.80416666666667,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.7220861085925224,
+      "mean_service_loss_vs_baseline": 0.053446299816069645,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.25
+    },
+    {
+      "pattern": "corrected_update",
+      "arm": "human_planner",
+      "runs": 1200,
+      "mean_total_cost": 1970.4481908274308,
+      "mean_cost_gap_vs_oracle": 1970.4481908274308,
+      "mean_stockout_cost": 1158.3051266033895,
+      "mean_holding_cost": 692.0284808907081,
+      "mean_action_cost": 95.11458333333333,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.6953979956153605,
+      "mean_service_loss_vs_baseline": 0.05489414599510978,
+      "before_cutoff_rate": 0.5475,
+      "miss_rate": 0.12166666666666667,
+      "extraction_exact_rate": 0.8783333333333333
+    },
+    {
+      "pattern": "corrected_update",
+      "arm": "hybrid_llm_human",
+      "runs": 1200,
+      "mean_total_cost": 1766.174297659661,
+      "mean_cost_gap_vs_oracle": 1766.174297659661,
+      "mean_stockout_cost": 838.4214358307562,
+      "mean_holding_cost": 779.2111201622382,
+      "mean_action_cost": 139.95840833333332,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.7867173023156078,
+      "mean_service_loss_vs_baseline": 0.016470924780170825,
+      "before_cutoff_rate": 0.8725,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.8333333333333334
+    },
+    {
+      "pattern": "corrected_update",
+      "arm": "llm_agent",
+      "runs": 1200,
+      "mean_total_cost": 1814.8014323481746,
+      "mean_cost_gap_vs_oracle": 1814.8014323481746,
+      "mean_stockout_cost": 660.0365700469416,
+      "mean_holding_cost": 978.5565289678996,
+      "mean_action_cost": 175.95833333333334,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.8297546337005983,
+      "mean_service_loss_vs_baseline": 0.014064393428386536,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.8333333333333334
+    },
+    {
+      "pattern": "corrected_update",
+      "arm": "oracle",
+      "runs": 1200,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "pattern": "corrected_update",
+      "arm": "rule_system",
+      "runs": 1200,
+      "mean_total_cost": 1898.0067163510464,
+      "mean_cost_gap_vs_oracle": 1898.0067163510464,
+      "mean_stockout_cost": 859.4532109888198,
+      "mean_holding_cost": 899.5410053622265,
+      "mean_action_cost": 138.9125,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.7855456854433726,
+      "mean_service_loss_vs_baseline": 0.030300362413455708,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.6666666666666666
+    },
+    {
+      "pattern": "lead_time_delay",
+      "arm": "human_planner",
+      "runs": 1200,
+      "mean_total_cost": 1880.4008494941174,
+      "mean_cost_gap_vs_oracle": 1880.4008494941174,
+      "mean_stockout_cost": 1231.2818070092278,
+      "mean_holding_cost": 536.9286341515565,
+      "mean_action_cost": 87.19040833333332,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.6734053985129191,
+      "mean_service_loss_vs_baseline": 0.07644386428125777,
+      "before_cutoff_rate": 0.5966666666666667,
+      "miss_rate": 0.09666666666666666,
+      "extraction_exact_rate": 0.9033333333333333
+    },
+    {
+      "pattern": "lead_time_delay",
+      "arm": "hybrid_llm_human",
+      "runs": 1200,
+      "mean_total_cost": 1708.336948065231,
+      "mean_cost_gap_vs_oracle": 1708.336948065231,
+      "mean_stockout_cost": 910.7322157721478,
+      "mean_holding_cost": 658.7674322930831,
+      "mean_action_cost": 130.25396666666666,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.7512224175406049,
+      "mean_service_loss_vs_baseline": 0.03860047253395072,
+      "before_cutoff_rate": 0.7775,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.75
+    },
+    {
+      "pattern": "lead_time_delay",
+      "arm": "llm_agent",
+      "runs": 1200,
+      "mean_total_cost": 1749.8937726982106,
+      "mean_cost_gap_vs_oracle": 1749.8937726982106,
+      "mean_stockout_cost": 876.0747601911002,
+      "mean_holding_cost": 717.573179173777,
+      "mean_action_cost": 155.99583333333334,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.7566808627225688,
+      "mean_service_loss_vs_baseline": 0.045438801612065,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.75
+    },
+    {
+      "pattern": "lead_time_delay",
+      "arm": "oracle",
+      "runs": 1200,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "pattern": "lead_time_delay",
+      "arm": "rule_system",
+      "runs": 1200,
+      "mean_total_cost": 1914.0256508570487,
+      "mean_cost_gap_vs_oracle": 1914.0256508570487,
+      "mean_stockout_cost": 1240.6933389824092,
+      "mean_holding_cost": 584.878145207973,
+      "mean_action_cost": 88.35416666666666,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.6471216349042244,
+      "mean_service_loss_vs_baseline": 0.10418472437174324,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.4166666666666667
+    },
+    {
+      "pattern": "partial_shipment",
+      "arm": "human_planner",
+      "runs": 1200,
+      "mean_total_cost": 1950.0602142271002,
+      "mean_cost_gap_vs_oracle": 1950.0602142271002,
+      "mean_stockout_cost": 993.1064362404828,
+      "mean_holding_cost": 776.9567113199508,
+      "mean_action_cost": 154.99706666666665,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.7647782832555263,
+      "mean_service_loss_vs_baseline": 0.01991808529276203,
+      "before_cutoff_rate": 0.7366666666666667,
+      "miss_rate": 0.11166666666666666,
+      "extraction_exact_rate": 0.8883333333333333
+    },
+    {
+      "pattern": "partial_shipment",
+      "arm": "hybrid_llm_human",
+      "runs": 1200,
+      "mean_total_cost": 1792.4473513332273,
+      "mean_cost_gap_vs_oracle": 1792.4473513332273,
+      "mean_stockout_cost": 699.7035786705925,
+      "mean_holding_cost": 882.5399476626347,
+      "mean_action_cost": 201.62049166666665,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.8371171749288044,
+      "mean_service_loss_vs_baseline": 0.007990301981653429,
+      "before_cutoff_rate": 0.9641666666666666,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.5
+    },
+    {
+      "pattern": "partial_shipment",
+      "arm": "llm_agent",
+      "runs": 1200,
+      "mean_total_cost": 1896.5508387739192,
+      "mean_cost_gap_vs_oracle": 1896.5508387739192,
+      "mean_stockout_cost": 819.8879763437202,
+      "mean_holding_cost": 887.9711957635323,
+      "mean_action_cost": 188.44166666666666,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.8055701395442288,
+      "mean_service_loss_vs_baseline": 0.01329032663904575,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.5
+    },
+    {
+      "pattern": "partial_shipment",
+      "arm": "oracle",
+      "runs": 1200,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "pattern": "partial_shipment",
+      "arm": "rule_system",
+      "runs": 1200,
+      "mean_total_cost": 1881.4668442742877,
+      "mean_cost_gap_vs_oracle": 1881.4668442742877,
+      "mean_stockout_cost": 848.2884342901057,
+      "mean_holding_cost": 869.3159099841822,
+      "mean_action_cost": 163.7625,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.8054794605350354,
+      "mean_service_loss_vs_baseline": 0.008851406884568825,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.9166666666666666
+    },
+    {
+      "pattern": "shipment_cancellation",
+      "arm": "human_planner",
+      "runs": 1200,
+      "mean_total_cost": 2227.463339674181,
+      "mean_cost_gap_vs_oracle": 2227.463339674181,
+      "mean_stockout_cost": 1360.6426214634944,
+      "mean_holding_cost": 703.0690682106869,
+      "mean_action_cost": 138.75164999999998,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.6886488827718139,
+      "mean_service_loss_vs_baseline": 0.05542202919545448,
+      "before_cutoff_rate": 0.5716666666666667,
+      "miss_rate": 0.09666666666666666,
+      "extraction_exact_rate": 0.9033333333333333
+    },
+    {
+      "pattern": "shipment_cancellation",
+      "arm": "hybrid_llm_human",
+      "runs": 1200,
+      "mean_total_cost": 2060.471748386997,
+      "mean_cost_gap_vs_oracle": 2060.471748386997,
+      "mean_stockout_cost": 1016.8119552864099,
+      "mean_holding_cost": 828.5543597672539,
+      "mean_action_cost": 206.5221,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.783251835281989,
+      "mean_service_loss_vs_baseline": 0.029558387503449617,
+      "before_cutoff_rate": 0.9233333333333333,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.5833333333333334
+    },
+    {
+      "pattern": "shipment_cancellation",
+      "arm": "llm_agent",
+      "runs": 1200,
+      "mean_total_cost": 2113.8519555080584,
+      "mean_cost_gap_vs_oracle": 2113.8519555080584,
+      "mean_stockout_cost": 954.6391887514677,
+      "mean_holding_cost": 935.0711000899241,
+      "mean_action_cost": 223.89166666666665,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.8017836943046254,
+      "mean_service_loss_vs_baseline": 0.029673526730603153,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.5833333333333334
+    },
+    {
+      "pattern": "shipment_cancellation",
+      "arm": "oracle",
+      "runs": 1200,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "pattern": "shipment_cancellation",
+      "arm": "rule_system",
+      "runs": 1200,
+      "mean_total_cost": 2113.7019555080583,
+      "mean_cost_gap_vs_oracle": 2113.7019555080583,
+      "mean_stockout_cost": 954.6391887514677,
+      "mean_holding_cost": 935.0711000899241,
+      "mean_action_cost": 223.89166666666665,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.8017836943046254,
+      "mean_service_loss_vs_baseline": 0.029673526730603153,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.75
+    }
+  ],
+  "by_cutoff_tier": [
+    {
+      "cutoff_tier": "easy",
+      "arm": "human_planner",
+      "runs": 1500,
+      "mean_total_cost": 1800.9008634516488,
+      "mean_cost_gap_vs_oracle": 1800.9008634516488,
+      "mean_stockout_cost": 953.9065691288033,
+      "mean_holding_cost": 658.6571276561787,
+      "mean_action_cost": 163.33716666666666,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.7555211154543418,
+      "mean_service_loss_vs_baseline": 0.034699079389653054,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.108,
+      "extraction_exact_rate": 0.892
+    },
+    {
+      "cutoff_tier": "easy",
+      "arm": "hybrid_llm_human",
+      "runs": 1500,
+      "mean_total_cost": 1736.7095239486002,
+      "mean_cost_gap_vs_oracle": 1736.7095239486002,
+      "mean_stockout_cost": 853.3175225312765,
+      "mean_holding_cost": 698.782001417324,
+      "mean_action_cost": 176.02666666666667,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.7788332104753729,
+      "mean_service_loss_vs_baseline": 0.036432177512424606,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.06666666666666667,
+      "extraction_exact_rate": 0.6666666666666666
+    },
+    {
+      "cutoff_tier": "easy",
+      "arm": "llm_agent",
+      "runs": 1500,
+      "mean_total_cost": 1789.7718032831842,
+      "mean_cost_gap_vs_oracle": 1789.7718032831842,
+      "mean_stockout_cost": 850.4918227956018,
+      "mean_holding_cost": 763.0033138209158,
+      "mean_action_cost": 176.02666666666667,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.779356382237585,
+      "mean_service_loss_vs_baseline": 0.036432177512424606,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.6666666666666666
+    },
+    {
+      "cutoff_tier": "easy",
+      "arm": "oracle",
+      "runs": 1500,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "cutoff_tier": "easy",
+      "arm": "rule_system",
+      "runs": 1500,
+      "mean_total_cost": 1874.1366610894097,
+      "mean_cost_gap_vs_oracle": 1874.1366610894097,
+      "mean_stockout_cost": 1048.772361395716,
+      "mean_holding_cost": 678.0576330270271,
+      "mean_action_cost": 147.20666666666668,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.7225711375214553,
+      "mean_service_loss_vs_baseline": 0.05185619385005824,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.5333333333333333
+    },
+    {
+      "cutoff_tier": "moderate",
+      "arm": "human_planner",
+      "runs": 2100,
+      "mean_total_cost": 2082.2366964245844,
+      "mean_cost_gap_vs_oracle": 2082.2366964245844,
+      "mean_stockout_cost": 1214.6666566462454,
+      "mean_holding_cost": 700.9846588259583,
+      "mean_action_cost": 141.58538095238094,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.7274137074133932,
+      "mean_service_loss_vs_baseline": 0.04310972491139346,
+      "before_cutoff_rate": 0.7457142857142857,
+      "miss_rate": 0.12047619047619047,
+      "extraction_exact_rate": 0.8795238095238095
+    },
+    {
+      "cutoff_tier": "moderate",
+      "arm": "hybrid_llm_human",
+      "runs": 2100,
+      "mean_total_cost": 1887.9313872219552,
+      "mean_cost_gap_vs_oracle": 1887.9313872219552,
+      "mean_stockout_cost": 880.9523044567977,
+      "mean_holding_cost": 807.0147970508718,
+      "mean_action_cost": 191.38095238095238,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.806186684119501,
+      "mean_service_loss_vs_baseline": 0.016393278507808036,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.47619047619047616
+    },
+    {
+      "cutoff_tier": "moderate",
+      "arm": "llm_agent",
+      "runs": 2100,
+      "mean_total_cost": 1990.577749290074,
+      "mean_cost_gap_vs_oracle": 1990.577749290074,
+      "mean_stockout_cost": 956.476119794188,
+      "mean_holding_cost": 851.8682961625526,
+      "mean_action_cost": 181.98333333333332,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.7854111965730789,
+      "mean_service_loss_vs_baseline": 0.02252952805881648,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.47619047619047616
+    },
+    {
+      "cutoff_tier": "moderate",
+      "arm": "oracle",
+      "runs": 2100,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "cutoff_tier": "moderate",
+      "arm": "rule_system",
+      "runs": 2100,
+      "mean_total_cost": 2079.79152088273,
+      "mean_cost_gap_vs_oracle": 2079.79152088273,
+      "mean_stockout_cost": 1179.2506388401273,
+      "mean_holding_cost": 766.0170725187934,
+      "mean_action_cost": 134.42380952380952,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.7334219056773374,
+      "mean_service_loss_vs_baseline": 0.043264209124860474,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.5714285714285714
+    },
+    {
+      "cutoff_tier": "near_impossible",
+      "arm": "human_planner",
+      "runs": 600,
+      "mean_total_cost": 2087.2254407926716,
+      "mean_cost_gap_vs_oracle": 2087.2254407926716,
+      "mean_stockout_cost": 1430.0549115828992,
+      "mean_holding_cost": 583.6407292097724,
+      "mean_action_cost": 48.5298,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.6240373436454584,
+      "mean_service_loss_vs_baseline": 0.06386992222363433,
+      "before_cutoff_rate": 0.0,
+      "miss_rate": 0.135,
+      "extraction_exact_rate": 0.865
+    },
+    {
+      "cutoff_tier": "near_impossible",
+      "arm": "hybrid_llm_human",
+      "runs": 600,
+      "mean_total_cost": 1926.349604947773,
+      "mean_cost_gap_vs_oracle": 1926.349604947773,
+      "mean_stockout_cost": 1186.4177776411684,
+      "mean_holding_cost": 648.0222439732713,
+      "mean_action_cost": 83.32625,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.694105889577558,
+      "mean_service_loss_vs_baseline": 0.018932475554624243,
+      "before_cutoff_rate": 0.175,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.6666666666666666
+    },
+    {
+      "cutoff_tier": "near_impossible",
+      "arm": "llm_agent",
+      "runs": 600,
+      "mean_total_cost": 1711.2105202641426,
+      "mean_cost_gap_vs_oracle": 1711.2105202641426,
+      "mean_stockout_cost": 460.21331928175147,
+      "mean_holding_cost": 974.397200982391,
+      "mean_action_cost": 276.35,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.8728974978609041,
+      "mean_service_loss_vs_baseline": 0.00997903452133496,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.6666666666666666
+    },
+    {
+      "cutoff_tier": "near_impossible",
+      "arm": "oracle",
+      "runs": 600,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "cutoff_tier": "near_impossible",
+      "arm": "rule_system",
+      "runs": 600,
+      "mean_total_cost": 1814.4211929916269,
+      "mean_cost_gap_vs_oracle": 1814.4211929916269,
+      "mean_stockout_cost": 686.8203101868305,
+      "mean_holding_cost": 911.2925494714632,
+      "mean_action_cost": 216.20833333333331,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.802386038503615,
+      "mean_service_loss_vs_baseline": 0.06255233267084696,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.5
+    },
+    {
+      "cutoff_tier": "tight",
+      "arm": "human_planner",
+      "runs": 1800,
+      "mean_total_cost": 2150.9061536733375,
+      "mean_cost_gap_vs_oracle": 2150.9061536733375,
+      "mean_stockout_cost": 1202.67928132658,
+      "mean_holding_cost": 824.1638334578687,
+      "mean_action_cost": 99.06303888888888,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.6842573786853821,
+      "mean_service_loss_vs_baseline": 0.06526633142848148,
+      "before_cutoff_rate": 0.3411111111111111,
+      "miss_rate": 0.07777777777777778,
+      "extraction_exact_rate": 0.9222222222222223
+    },
+    {
+      "cutoff_tier": "tight",
+      "arm": "hybrid_llm_human",
+      "runs": 1800,
+      "mean_total_cost": 1936.4281735936975,
+      "mean_cost_gap_vs_oracle": 1936.4281735936975,
+      "mean_stockout_cost": 700.4076963656684,
+      "mean_holding_cost": 1041.4655605613623,
+      "mean_action_cost": 185.9715833333333,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.8239709048859801,
+      "mean_service_loss_vs_baseline": 0.02318622158444198,
+      "before_cutoff_rate": 0.8527777777777777,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.7222222222222222
+    },
+    {
+      "cutoff_tier": "tight",
+      "arm": "llm_agent",
+      "runs": 1800,
+      "mean_total_cost": 1992.6387941895707,
+      "mean_cost_gap_vs_oracle": 1992.6387941895707,
+      "mean_stockout_cost": 704.7209737745733,
+      "mean_holding_cost": 1106.5150426372197,
+      "mean_action_cost": 181.15277777777777,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.830331255547805,
+      "mean_service_loss_vs_baseline": 0.022303348164167673,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.7222222222222222
+    },
+    {
+      "cutoff_tier": "tight",
+      "arm": "oracle",
+      "runs": 1800,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "cutoff_tier": "tight",
+      "arm": "rule_system",
+      "runs": 1800,
+      "mean_total_cost": 2019.749409111833,
+      "mean_cost_gap_vs_oracle": 2019.749409111833,
+      "mean_stockout_cost": 843.0874804380063,
+      "mean_holding_cost": 1026.3147064516047,
+      "mean_action_cost": 150.2472222222222,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.7827475384605419,
+      "mean_service_loss_vs_baseline": 0.03643169706662564,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.7222222222222222
+    }
+  ],
+  "by_noise": [
+    {
+      "noise_tier": "high",
+      "arm": "human_planner",
+      "runs": 2000,
+      "mean_total_cost": 1954.3163577799426,
+      "mean_cost_gap_vs_oracle": 1954.3163577799426,
+      "mean_stockout_cost": 1091.1183363620698,
+      "mean_holding_cost": 734.9623314178726,
+      "mean_action_cost": 103.23568999999999,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.7118456559922235,
+      "mean_service_loss_vs_baseline": 0.04903509808729466,
+      "before_cutoff_rate": 0.611,
+      "miss_rate": 0.178,
+      "extraction_exact_rate": 0.822
+    },
+    {
+      "noise_tier": "high",
+      "arm": "hybrid_llm_human",
+      "runs": 2000,
+      "mean_total_cost": 1813.9458162290723,
+      "mean_cost_gap_vs_oracle": 1813.9458162290723,
+      "mean_stockout_cost": 806.0977553564265,
+      "mean_holding_cost": 852.6686775393124,
+      "mean_action_cost": 146.59605,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.791048316229239,
+      "mean_service_loss_vs_baseline": 0.023224048534429047,
+      "before_cutoff_rate": 0.863,
+      "miss_rate": 0.05,
+      "extraction_exact_rate": 0.45
+    },
+    {
+      "noise_tier": "high",
+      "arm": "llm_agent",
+      "runs": 2000,
+      "mean_total_cost": 1917.8557174566367,
+      "mean_cost_gap_vs_oracle": 1917.8557174566367,
+      "mean_stockout_cost": 865.8507863476884,
+      "mean_holding_cost": 901.3399311089482,
+      "mean_action_cost": 150.415,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.779469581627299,
+      "mean_service_loss_vs_baseline": 0.027737667580399004,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.45
+    },
+    {
+      "noise_tier": "high",
+      "arm": "oracle",
+      "runs": 2000,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "noise_tier": "high",
+      "arm": "rule_system",
+      "runs": 2000,
+      "mean_total_cost": 1976.9455117821144,
+      "mean_cost_gap_vs_oracle": 1976.9455117821144,
+      "mean_stockout_cost": 1062.4124281104193,
+      "mean_holding_cost": 814.1530836716952,
+      "mean_action_cost": 100.28,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.7190365512050964,
+      "mean_service_loss_vs_baseline": 0.05828990001083139,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.4
+    },
+    {
+      "noise_tier": "low",
+      "arm": "human_planner",
+      "runs": 2000,
+      "mean_total_cost": 2122.9311229938403,
+      "mean_cost_gap_vs_oracle": 2122.9311229938403,
+      "mean_stockout_cost": 1248.2436976527506,
+      "mean_holding_cost": 706.3102153410898,
+      "mean_action_cost": 143.37721,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.6993813196246769,
+      "mean_service_loss_vs_baseline": 0.0499910674423398,
+      "before_cutoff_rate": 0.5175,
+      "miss_rate": 0.038,
+      "extraction_exact_rate": 0.962
+    },
+    {
+      "noise_tier": "low",
+      "arm": "hybrid_llm_human",
+      "runs": 2000,
+      "mean_total_cost": 1926.0681799304339,
+      "mean_cost_gap_vs_oracle": 1926.0681799304339,
+      "mean_stockout_cost": 852.6514281487458,
+      "mean_holding_cost": 854.2036184483547,
+      "mean_action_cost": 210.6298,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.8028860145543615,
+      "mean_service_loss_vs_baseline": 0.02187327903460794,
+      "before_cutoff_rate": 0.8655,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.85
+    },
+    {
+      "noise_tier": "low",
+      "arm": "llm_agent",
+      "runs": 2000,
+      "mean_total_cost": 1906.7954976609028,
+      "mean_cost_gap_vs_oracle": 1906.7954976609028,
+      "mean_stockout_cost": 686.0597473634274,
+      "mean_holding_cost": 979.7507502974755,
+      "mean_action_cost": 240.73499999999999,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.8445140196578514,
+      "mean_service_loss_vs_baseline": 0.01735139507720559,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.85
+    },
+    {
+      "noise_tier": "low",
+      "arm": "oracle",
+      "runs": 2000,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "noise_tier": "low",
+      "arm": "rule_system",
+      "runs": 2000,
+      "mean_total_cost": 1938.79218262142,
+      "mean_cost_gap_vs_oracle": 1938.79218262142,
+      "mean_stockout_cost": 786.0536434444945,
+      "mean_holding_cost": 935.1085391769254,
+      "mean_action_cost": 217.53,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.8134608721467084,
+      "mean_service_loss_vs_baseline": 0.03006690908941776,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.9
+    },
+    {
+      "noise_tier": "medium",
+      "arm": "human_planner",
+      "runs": 2000,
+      "mean_total_cost": 2021.7598686045726,
+      "mean_cost_gap_vs_oracle": 2021.7598686045726,
+      "mean_stockout_cost": 1162.8957089791313,
+      "mean_holding_cost": 705.5938596254414,
+      "mean_action_cost": 128.2703,
+      "mean_processing_cost": 25.0,
+      "mean_service_level": 0.7222410976684002,
+      "mean_service_loss_vs_baseline": 0.050164030122292105,
+      "before_cutoff_rate": 0.7115,
+      "miss_rate": 0.102,
+      "extraction_exact_rate": 0.898
+    },
+    {
+      "noise_tier": "medium",
+      "arm": "hybrid_llm_human",
+      "runs": 2000,
+      "mean_total_cost": 1865.5363411036565,
+      "mean_cost_gap_vs_oracle": 1865.5363411036565,
+      "mean_stockout_cost": 892.5311380943746,
+      "mean_holding_cost": 796.3054196759487,
+      "mean_action_cost": 168.11645,
+      "mean_processing_cost": 8.583333333333334,
+      "mean_service_level": 0.7864921766690547,
+      "mean_service_loss_vs_baseline": 0.02598709009086496,
+      "before_cutoff_rate": 0.8915,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.55
+    },
+    {
+      "noise_tier": "medium",
+      "arm": "llm_agent",
+      "runs": 2000,
+      "mean_total_cost": 1914.5223449492828,
+      "mean_cost_gap_vs_oracle": 1914.5223449492828,
+      "mean_stockout_cost": 862.5711313511243,
+      "mean_holding_cost": 873.8062135981584,
+      "mean_action_cost": 177.89499999999998,
+      "mean_processing_cost": 0.25,
+      "mean_service_level": 0.7943828211460668,
+      "mean_service_loss_vs_baseline": 0.028957798642622563,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.55
+    },
+    {
+      "noise_tier": "medium",
+      "arm": "oracle",
+      "runs": 2000,
+      "mean_total_cost": 0.0,
+      "mean_cost_gap_vs_oracle": 0.0,
+      "mean_stockout_cost": 0.0,
+      "mean_holding_cost": 0.0,
+      "mean_action_cost": 0.0,
+      "mean_processing_cost": 0.0,
+      "mean_service_level": 1.0,
+      "mean_service_loss_vs_baseline": 0.0,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 1.0
+    },
+    {
+      "noise_tier": "medium",
+      "arm": "rule_system",
+      "runs": 2000,
+      "mean_total_cost": 2035.7467244385273,
+      "mean_cost_gap_vs_oracle": 2035.7467244385273,
+      "mean_stockout_cost": 1141.1511957242615,
+      "mean_holding_cost": 760.670528714266,
+      "mean_action_cost": 133.825,
+      "mean_processing_cost": 0.1,
+      "mean_service_level": 0.7247125269160634,
+      "mean_service_loss_vs_baseline": 0.0475169830296152,
+      "before_cutoff_rate": 1.0,
+      "miss_rate": 0.0,
+      "extraction_exact_rate": 0.5
+    }
+  ]
+}

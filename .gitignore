@@ -1,5 +1,6 @@
 .env
 __pycache__/
 *.pyc
-outputs/actual_llm_predictions.jsonl
+report/build/
 outputs/llm_requests.jsonl
+outputs/pilot_llm_requests.jsonl

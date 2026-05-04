@@ -1,0 +1,373 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage[numbers]{natbib}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue
+}
+
+\setlength{\parskip}{0.30em}
+\setlength{\parindent}{0pt}
+\setlist[itemize]{leftmargin=1.2em,itemsep=0.15em,topsep=0.2em}
+\captionsetup{font=small,labelfont=bf}
+
+\title{\vspace{-1.5em}LLM-Based Supplier Email Extraction for Supply Chain Exception Response}
+\author{IEOR 230 Final Project}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report studies a practical supply-chain question: when a supplier sends messy emails about a delayed, cancelled, or partially filled shipment, can an LLM help the firm react faster and cheaper? The LLM does not decide how much inventory to order; it extracts the fields an inventory system needs: SKU, location, disruption type, ETA, delay length, and affected quantity. We construct 60 held-out supplier-email packets with distractors, corrections, and ambiguous wording, then compare a Gemini LLM agent, a rule-based parser, a human planner, a hybrid LLM-plus-human workflow, and an oracle benchmark. Gemini achieves a 61.7\% packet-level exact match, while the rule parser achieves 60.0\%. In simulation, the hybrid workflow has the lowest non-oracle mean cost (\$1,868.52), followed by the LLM agent (\$1,913.06), rule system (\$1,983.83), and human planner (\$2,033.00). The result supports a qualified thesis: LLMs can improve responsiveness by converting unstructured supplier communication into structured exception signals, but hallucination risk makes validation and selective human review important.
+\end{abstract}
+
+\section{Introduction}
+
+Supply chain managers frequently make inventory decisions before all relevant information is cleanly available in the firm's ERP system. A supplier may first report a problem in an email: one truck is late, only part of a purchase order will ship, or a corrected follow-up message overrides an earlier estimate. We call this situation an \emph{inventory exception}: the normal replenishment plan is no longer reliable, so the firm must decide whether to reallocate inventory from another location, expedite a replacement shipment, place a late standard reorder, or do nothing.
+
+These actions represent common exception-response choices in inventory systems: use existing network inventory, pay for faster replenishment, accept a slower reorder, or take no action when the signal is unreliable. Therefore, the experiment tests whether better information changes the feasible operational response before the cutoff, not only whether text extraction is accurate.
+
+The key operational problem is not only the inventory formula. It is also the speed and accuracy with which the firm notices the exception. If the supplier's message is buried in a noisy thread, a planner may respond too late. This information latency matters because delayed recognition of a disruption can amplify shortages, emergency shipping, and coordination costs. The classic bullwhip-effect literature shows that distorted or delayed information can propagate through inventory decisions \citep{lee1997bullwhip}. Generative AI changes this setting because LLMs can read unstructured language and produce structured records quickly. However, LLMs are not deterministic optimizers and can produce plausible but incorrect outputs.
+
+Our contribution is an experiment focused on this decision interface: supplier-email extraction before inventory exception response. We do not allow the LLM to choose the inventory action. Instead, it extracts the actionable disruption signal from supplier emails, and a fixed downstream rule decides the response. This design isolates the value and risk of LLMs as a language-understanding layer rather than treating them as autonomous supply chain planners.
+
+\section{What LLMs and AI Agents Actually Add}
+
+The most useful way to evaluate LLMs and AI agents is through concrete cases rather than broad claims. Table~\ref{tab:cases} summarizes three real-world examples that motivate our narrower experimental design.
+
+\begin{table}[H]
+\centering
+\caption{Real-world examples motivating the extraction-and-response framing.}
+\label{tab:cases}
+\scriptsize
+\begin{tabular}{@{}p{0.22\linewidth}p{0.39\linewidth}p{0.31\linewidth}@{}}
+\toprule
+Case & What the technology adds & Link to our experiment \\
+\midrule
+Walmart in Mexico City & Walmart reports that Self-Healing Inventory identifies overstocks and reroutes supply to stores that need it most, with more than \$55 million in savings attributed to the system \citep{walmart2025supplychain}. & AI adds rapid monitoring and rebalancing around a structured inventory problem, not a replacement for inventory logic. \\
+Microsoft and Domino's & Domino's Pizza UK and Ireland used Microsoft Dynamics 365 demand planning to support daily ingredient decisions \citep{microsoft2023dominos}. Microsoft also documents Copilot features that explain forecast shifts in natural language \citep{microsoft2025copilotdemand}. & LLM-style explanation reduces interpretation time while the forecast engine remains separate. \\
+Amazon Science & Amazon Science describes a multi-agent system that turns support tickets, emails, and chats into reusable supply-chain knowledge, reducing raw information volume and improving downstream RAG quality \citep{amazon2025supplyrag}. & Many exceptions are delayed by search and interpretation, not by the mathematical policy itself. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Together, these cases suggest that the practical value of LLMs and agents is not autonomous planning in isolation. Their contribution is faster recognition, explanation, routing, and reuse of operational information. Our experiment therefore tests the LLM as an information-extraction layer before a fixed inventory response policy.
+
+\section{Research Question and Hypothesis}
+
+The research question is:
+
+\begin{quote}
+Can an LLM improve inventory exception response by extracting actionable disruption information from noisy supplier emails faster than rule-based systems or manual planning?
+\end{quote}
+
+The hypothesis is not that an LLM should replace supply chain managers. The expected advantage is \emph{time-to-detection}: how quickly the workflow turns a supplier email into usable data. In our experiment, each disruption has an operational cutoff. Before the cutoff, the firm can still use faster corrective actions, such as reallocation from available surplus or expedited replenishment. After the cutoff, the firm can still respond, but only through a slower standard reorder. The central trade-off is therefore:
+
+\begin{equation}
+\text{Operational value of LLM} =
+\text{speed benefit} - \text{extraction-error cost} - \text{processing cost}.
+\end{equation}
+
+Rather than evaluating ``AI in supply chain management'' broadly, the experiment evaluates a specific function: extracting supplier disruption fields that feed a fixed inventory response policy.
+
+\section{Experimental Design}
+
+\subsection{Evaluation Set}
+
+We use a synthetic but controlled supplier-email evaluation set. A \emph{packet} is one simulated inbox snapshot for a planner: it contains several supplier emails plus ERP-like inventory records for multiple SKU-location pairs. The pilot set contains 12 packets used only to tune the LLM prompt and rule-based parser. The scored set contains 60 held-out packets used for final evaluation. Each scored packet includes five to eight emails, multiple SKU-location records, distractor messages, and exactly one gold disruption label. The patterns include lead-time delay, partial shipment, shipment cancellation, corrected update, and ambiguous buried delay. This structure tests whether the workflow can identify the decisive message rather than simply parse a clean template.
+
+\subsection{Workflow Arms}
+
+Table~\ref{tab:arms} summarizes the evaluated workflows. All realistic arms receive the same inventory state and use the same downstream response rule. They differ only in how the disruption information is obtained from supplier communication. The oracle is a lower-bound benchmark with perfect knowledge of demand and disruptions; it is not a realistic operating arm. The comparison of practical interest is among LLM agent, rule system, human planner, and hybrid workflow.
+
+\begin{table}[H]
+\centering
+\caption{Experiment arms.}
+\label{tab:arms}
+\small
+\begin{tabular}{@{}p{0.18\linewidth}p{0.63\linewidth}p{0.10\linewidth}@{}}
+\toprule
+Arm & Information process & Delay \\
+\midrule
+Oracle & Perfect benchmark with exact disruption and demand knowledge. & 0 \\
+LLM agent & Gemini extracts a structured disruption record from the email packet. & 0.05 days \\
+Rule system & Deterministic parser calibrated only on pilot packets extracts the same schema. & 0.05 days \\
+Human planner & Human receives the gold interpretation after stochastic queue delay and noise-dependent miss risk. & 0.5--3 days \\
+Hybrid & LLM triages quickly; human approval corrects the signal when key identifiers match. & 0.30--1.05 days \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Inventory and Cost Model}
+
+After a workflow extracts a disruption signal, the same inventory response policy is applied. For each packet, the focal SKU-location is simulated over a 10-day horizon. Daily demand is stochastic. Let
+
+\begin{equation}
+X_t \sim \mathcal{N}(\mu,\sigma^2),
+\end{equation}
+
+and set realized nonnegative demand as:
+
+\begin{equation}
+D_t=\max(0,X_t), \quad t=1,\ldots,10.
+\end{equation}
+
+Initial supply is calibrated around a base-stock protection level:
+
+\begin{equation}
+S = \mu(L+R) + z_{\alpha}\sigma\sqrt{L+R},
+\end{equation}
+
+where $L$ is normal lead time, $R=1$ is the review period, and $z_{\alpha}=1.645$ corresponds to a 95\% cycle-service target. The simulation then tracks inventory recursively:
+
+This sets initial supply equal to expected demand over lead time plus review period, plus a safety-stock buffer. The simulation then tracks inventory recursively:
+
+\begin{align}
+A_t &= I_{t-1} + Q_t^{\text{receipt}} + Q_t^{\text{action}},\\
+B_t &= \max(0, D_t - A_t),\\
+I_t &= \max(0, A_t - D_t).
+\end{align}
+
+The realized cost for arm $a$ in packet $i$ and simulation run $r$ is:
+
+\begin{equation}
+C_{iar}=p_i\sum_t B_t + h_i\sum_t I_t + C_{iar}^{\text{action}} + C_a^{\text{process}}.
+\end{equation}
+
+Service level is measured as:
+
+\begin{equation}
+\text{Service}_{iar}=1-\frac{\sum_t B_t}{\sum_t D_t}.
+\end{equation}
+
+This is the fraction of demand served during the 10-day horizon.
+
+The policy then converts the extracted signal into an action. Corrective actions are cutoff-based. Let $A_i^{\text{email}}$ be the arrival time of the decisive supplier email, $\Delta_a$ the workflow's processing delay, and $s_i$ the packet-specific cutoff slack. The detection time is:
+
+\begin{equation}
+d_{ia}=A_i^{\text{email}}+\Delta_a,
+\end{equation}
+
+and the cutoff time is:
+
+\begin{equation}
+\tau_i=A_i^{\text{email}}+s_i.
+\end{equation}
+
+The workflow is before cutoff if:
+
+\begin{equation}
+d_{ia}\leq \tau_i.
+\end{equation}
+
+If the signal is valid and before cutoff, the policy reallocates from surplus when available; otherwise it expedites. If detection occurs after cutoff, it places a slower standard reorder. The action costs are stylized operational penalties: reallocation is relatively cheap because inventory already exists inside the network, expediting is expensive because it uses premium replenishment, and late standard reorder is cheap per unit but slow. Thus, an LLM helps only if it extracts the signal accurately and early enough to change the feasible action. Full action-cost formulas are reported in Appendix~\ref{app:policy}.
+
+\section{Results}
+
+\subsection{Extraction Accuracy}
+
+Table~\ref{tab:extract} first evaluates the extraction step before any inventory simulation. Packet exact match means that all critical fields match the gold label. The rule system used keyword triggers for delay, cancellation, partial shipment, date-pattern extraction, SKU-location matching, and simple quantity arithmetic, but did not use semantic interpretation beyond those deterministic rules. Gemini and the rule system have similar packet-level accuracy, but different error profiles. Gemini is stronger at identifying the decisive email and disruption type, while the rule system is cheaper and deterministic but brittle on flexible language.
+
+\begin{table}[H]
+\centering
+\caption{Held-out extraction accuracy on 60 scored packets.}
+\label{tab:extract}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+Extractor & Packet & Email & Type & Orig. ETA & Rev. ETA & Delay & Qty. \\
+\midrule
+LLM agent & 0.617 & 0.983 & 0.983 & 0.817 & 0.850 & 0.783 & 0.900 \\
+Rule system & 0.600 & 0.833 & 0.833 & 0.683 & 0.750 & 0.650 & 0.833 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Operational Performance}
+
+Table~\ref{tab:performance} reports the end-to-end simulation results. Total cost includes stockout cost, holding cost, corrective-action cost, and processing cost. Service loss is measured relative to a no-disruption baseline under the same demand path. The oracle should be interpreted as a normalized lower-bound benchmark. Its cost is set to zero because it represents a perfect-information response baseline, not because real operations would be costless.
+
+The hybrid workflow has the lowest non-oracle mean total cost because it balances fast detection, fewer severe extraction errors than pure automation, and lower processing cost than full manual review. Compared with the human planner, the hybrid reduces mean cost by \$164.49 and improves the before-cutoff rate from 0.613 to 0.873. This shows that the main operational value comes from shortening the time between supplier communication and corrective action. Compared with the rule system, the LLM and hybrid workflows perform better because they handle more flexible language, especially corrected or buried disruption messages.
+
+The pure LLM arm has the highest service level among realistic arms, but it does not have the lowest total cost. Its speed allows it to act before cutoff in every packet, yet extraction errors can lead to excess holding cost or unnecessary corrective action. The hybrid workflow sacrifices some speed for targeted review, which lowers total cost even though its service level is slightly below the pure LLM arm. Appendix~B shows one important subgroup exception: in the near-impossible cutoff tier, even a small human-review delay can eliminate timely corrective action, so the pure LLM arm can outperform the hybrid despite higher extraction risk.
+
+\begin{table}[H]
+\centering
+\caption{End-to-end operational performance. Costs are mean dollars per packet-run.}
+\label{tab:performance}
+\small
+\begin{tabular}{lrrrrr}
+\toprule
+Arm & Total cost & Service & Service loss & Process cost & Before cutoff \\
+\midrule
+Hybrid LLM + human & 1868.52 & 0.793 & 0.024 & 8.58 & 0.873 \\
+LLM agent & 1913.06 & 0.806 & 0.025 & 0.25 & 1.000 \\
+Rule system & 1983.83 & 0.752 & 0.045 & 0.10 & 1.000 \\
+Human planner & 2033.00 & 0.711 & 0.050 & 25.00 & 0.613 \\
+Oracle & 0.00 & 1.000 & 0.000 & 0.00 & 1.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Managerial Implications}
+
+The experiment supports three managerial conclusions. First, LLMs are most defensible as augmentation, not as autonomous inventory planners: they should translate unstructured communication into structured fields while established inventory logic determines the action. Second, firms should compare LLMs against realistic baselines because rule-based parsers can be cheap and competitive on template-like messages. LLM value is highest where language is messy, corrected, or buried in a thread. Third, deployment should include controls such as date-consistency validation, case-pack arithmetic checks, evidence traces, and escalation for high-noise packets. A realistic deployment path would start with shadow-mode testing, then low-risk automatic extraction with human approval, and only later selective automation for low-noise packets that pass validation checks.
+
+\section{Limitations}
+
+The experiment isolates one operational mechanism, so its conclusions have scope limits. The email packets are synthetic, and real supplier emails may have different language, attachments, and error patterns. The response policy is stylized and omits supplier contracts, multi-period ordering constraints, capacity limits, and transportation network constraints. The experiment uses one LLM setup and one prompt, and the cost parameters are reasonable for comparison but not calibrated to one specific company.
+
+\section{Conclusion}
+
+This project evaluates generative AI in a specific supply-chain function: extracting supplier disruption signals before inventory exception response. A reader should interpret the result as a test of information flow, not a test of whether LLMs can design inventory policies. The evidence suggests that LLMs can improve responsiveness when the key bottleneck is unstructured communication, but current extraction accuracy is not high enough to justify unverified full automation in all cases. The strongest workflow in our experiment is hybrid LLM-plus-human verification, which reduces information latency while controlling hallucination risk. Appendix~C shows that this risk appears mainly as schema-valid but operationally wrong dates, delay lengths, and quantities. The broader implication is that LLMs should be framed as fast information processors that augment supply chain managers, not as replacements for managerial judgment or inventory-policy design.
+
+\clearpage
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\clearpage
+\appendix
+\section{Detailed Policy Logic}
+\label{app:policy}
+
+For an extracted signal with affected quantity $q$, detection day $d_a$, cutoff day $\tau_i$, and available surplus inventory $U_i$, the action function is:
+
+\[
+\text{action}(q,d_a,\tau_i,U_i)=
+\begin{cases}
+\text{no signal}, & \text{if the extracted signal is invalid},\\
+\text{reallocate}, & d_a \le \tau_i \text{ and } U_i\ge 0.35q,\\
+\text{expedite}, & d_a \le \tau_i \text{ and } U_i<0.35q,\\
+\text{standard reorder late}, & d_a > \tau_i.
+\end{cases}
+\]
+
+The action costs used in the simulation are:
+
+\[
+C^{\text{action}} =
+\begin{cases}
+25+0.35q, & \text{reallocate},\\
+40+0.85q, & \text{expedite},\\
+10+0.12q, & \text{standard reorder late},\\
+0, & \text{no signal}.
+\end{cases}
+\]
+
+The fixed component represents setup and coordination cost: creating a transfer task, contacting a carrier, or opening a replacement order. The per-unit component represents the marginal cost of moving or replacing the affected units. Reallocation is cheapest after setup because the product already exists in the network. Expediting is most expensive because it uses premium transportation or emergency replenishment. A late standard reorder is operationally cheap but slow, so its main penalty appears indirectly through higher shortage cost in the simulation.
+
+Labor cost assumptions use a loaded planner rate of \$50/hour. This is anchored to the BLS median logistician wage of \$80,880 per year, or \$38.89/hour, with a benefits and overhead multiplier \citep{bls2025logisticians}. Human-only review assumes 30 minutes per exception, or \$25. Hybrid approval assumes 10 minutes plus LLM processing, or \$8.58. Automated processing costs are set to \$0.25 for LLM extraction and \$0.10 for rule extraction; Gemini token prices are small relative to labor costs, so these are modeled as all-in processing assumptions rather than raw API cost only \citep{google2026pricing}.
+
+\section{Disruption Patterns and Cutoff Tiers}
+
+\begin{table}[H]
+\centering
+\caption{Trial-set design.}
+\small
+\begin{tabular}{lr}
+\toprule
+Design element & Value \\
+\midrule
+Pilot packets & 12 \\
+Scored packets & 60 \\
+Emails per packet & 5--8 \\
+Simulation runs per packet-arm & 100 \\
+Horizon & 10 days \\
+Disruption patterns & Delay, partial shipment, cancellation, correction, buried delay \\
+Cutoff tiers & Easy, moderate, tight, near-impossible \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Performance by cutoff tier.}
+\small
+\begin{tabular}{llrrr}
+\toprule
+Cutoff tier & Arm & Total cost & Before cutoff & Service \\
+\midrule
+Easy & Human & 1800.90 & 1.000 & 0.756 \\
+Easy & Hybrid & 1736.71 & 1.000 & 0.779 \\
+Easy & LLM & 1789.77 & 1.000 & 0.779 \\
+Easy & Rule & 1874.14 & 1.000 & 0.723 \\
+Moderate & Human & 2082.24 & 0.746 & 0.727 \\
+Moderate & Hybrid & 1887.93 & 1.000 & 0.806 \\
+Moderate & LLM & 1990.58 & 1.000 & 0.785 \\
+Moderate & Rule & 2079.79 & 1.000 & 0.733 \\
+Tight & Human & 2150.91 & 0.341 & 0.684 \\
+Tight & Hybrid & 1936.43 & 0.853 & 0.824 \\
+Tight & LLM & 1992.64 & 1.000 & 0.830 \\
+Tight & Rule & 2019.75 & 1.000 & 0.783 \\
+Near-impossible & Human & 2087.23 & 0.000 & 0.624 \\
+Near-impossible & Hybrid & 1926.35 & 0.175 & 0.694 \\
+Near-impossible & LLM & 1711.21 & 1.000 & 0.873 \\
+Near-impossible & Rule & 1814.42 & 1.000 & 0.802 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Hallucination and Risk Analysis}
+
+Structured output reduces formatting problems, but it does not guarantee semantic correctness. Google notes that structured-output schemas can enforce valid JSON while application code must still validate business logic \citep{google2026structured}. NIST's AI risk-management guidance similarly treats confabulation as a material generative-AI risk in consequential workflows \citep{nist2024genai,nist2023airmf}.
+
+In this experiment, hallucination should be understood operationally. The JSON may be well-formed, but a field can still be unsupported by the email evidence. Gemini produced 23 packets with at least one extraction error. The most common errors were delay days (13), original ETA (11), revised ETA (9), and affected quantity (6). Self-reported confidence was weakly calibrated: exact-match packets averaged 0.932 confidence, while packets with errors still averaged 0.922.
+
+\begin{table}[H]
+\centering
+\caption{Representative LLM hallucination cases.}
+\small
+\begin{tabular}{@{}p{0.12\linewidth}p{0.23\linewidth}p{0.26\linewidth}p{0.28\linewidth}@{}}
+\toprule
+Packet & Gold & Gemini output & Risk \\
+\midrule
+S060 & Original ETA 2026-04-29; revised ETA 2026-05-05; delay 6 days. & Original ETA 2026-04-22; revised ETA 2026-04-21; delay -1 day. & Negative delay is schema-valid but operationally impossible. \\
+S008 & 11 cases $\times$ 36 units plus 23 loose units = 419 units. & 407 units. & Understates affected quantity and can reduce corrective action. \\
+S059 & Actionable buried delay for SKU-522-A into DC-NORTH. & Classified as not actionable with null fields. & Suppresses the entire disruption signal. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Noise sensitivity of Gemini extraction.}
+\small
+\begin{tabular}{lrr}
+\toprule
+Noise tier & Packets & Packet exact-match rate \\
+\midrule
+Low & 20 & 85.0\% \\
+Medium & 20 & 55.0\% \\
+High & 20 & 45.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Reproducibility}
+
+The experiment code, prompts, packet data, predictions, and visualization generator are stored in the project folder. The main scripts are:
+
+\begin{itemize}
+  \item \texttt{prepare\_llm\_requests.py}: creates Gemini request packets from the prompt and data.
+  \item \texttt{run\_gemini\_requests.py}: runs Gemini extraction.
+  \item \texttt{rule\_based\_extractor.py}: runs the deterministic system baseline.
+  \item \texttt{score\_extraction\_predictions.py}: scores packet- and field-level extraction accuracy.
+  \item \texttt{run\_cutoff\_experiment.py}: runs the operational simulation.
+  \item \texttt{make\_visualizations.py}: regenerates report-ready visualizations.
+\end{itemize}
+
+\end{document}
